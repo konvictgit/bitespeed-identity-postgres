@@ -10,8 +10,3 @@ export const pool = new Pool({
   password: process.env.PGPASSWORD ? String(process.env.PGPASSWORD) : "",
   database: process.env.PGDATABASE,
 });
-console.log(
-  "PGPASSWORD:",
-  typeof process.env.PGPASSWORD,
-  process.env.PGPASSWORD
-);
