@@ -64,6 +64,25 @@ app.post("/identify", async (req, res) => {
         }
       }
     }
+
+    if (ids.length === 0) {
+      // No contact found, create new primary
+      const insert = await client.query(
+        `INSERT INTO Contact (phoneNumber,email,linkedId,linkPrecedence,createdAt,updatedAt,deletedAt)
+         VALUES ($1,$2,NULL,'primary',$3,$3,NULL) RETURNING *`,
+        [incomingPhone, incomingEmail, nowIso()]
+      );
+      const c = insert.rows[0];
+      await client.query("COMMIT");
+      return res.json({
+        contact: {
+          primaryContactId: c.id,
+          emails: c.email ? [c.email] : [],
+          phoneNumbers: c.phonenumber ? [c.phonenumber] : [],
+          secondaryContactIds: [],
+        },
+      });
+    }
   } catch (err) {
     await client.query("ROLLBACK");
     console.error(err);
