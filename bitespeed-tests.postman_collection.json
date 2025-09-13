@@ -1,0 +1,100 @@
+{
+  "info": {
+    "name": "Bitespeed Identity Reconciliation",
+    "_postman_id": "b9b1d4e0-8e9a-4d5a-90e7-identity-test",
+    "description": "Test collection for /identify endpoint with sample Back to the Future contacts",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Lorraine (new primary)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"lorraine@hillvalley.edu\",\n  \"phoneNumber\": \"123456\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/identify",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["identify"]
+        }
+      }
+    },
+    {
+      "name": "2. Marty (same phone, new email → secondary)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"mcfly@hillvalley.edu\",\n  \"phoneNumber\": \"123456\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/identify",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["identify"]
+        }
+      }
+    },
+    {
+      "name": "3. George (new phone → primary)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"george@hillvalley.edu\",\n  \"phoneNumber\": \"919191\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/identify",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["identify"]
+        }
+      }
+    },
+    {
+      "name": "4. Biff (another new phone → primary)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"biffsucks@hillvalley.edu\",\n  \"phoneNumber\": \"717171\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/identify",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["identify"]
+        }
+      }
+    },
+    {
+      "name": "5. Merge George + Biff (overlap)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"george@hillvalley.edu\",\n  \"phoneNumber\": \"717171\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/identify",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["identify"]
+        }
+      }
+    }
+  ]
+}
