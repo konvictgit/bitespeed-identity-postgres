@@ -29,7 +29,6 @@ app.post("/identify", async (req, res) => {
   try {
     await client.query("BEGIN");
 
-    // Step 1: find existing contacts with same email or phone
     const initialRows = await client.query(
       `SELECT * FROM Contact WHERE (email = $1 AND email IS NOT NULL) OR (phoneNumber = $2 AND phoneNumber IS NOT NULL)`,
       [incomingEmail, incomingPhone]
@@ -45,7 +44,6 @@ app.post("/identify", async (req, res) => {
       ids.push(r.id);
     });
 
-    // Expand connected set
     let changed = true;
     while (changed) {
       changed = false;
@@ -66,7 +64,6 @@ app.post("/identify", async (req, res) => {
     }
 
     if (ids.length === 0) {
-      // No contact found, create new primary
       const insert = await client.query(
         `INSERT INTO Contact (phoneNumber,email,linkedId,linkPrecedence,createdAt,updatedAt,deletedAt)
          VALUES ($1,$2,NULL,'primary',$3,$3,NULL) RETURNING *`,
@@ -92,7 +89,5 @@ app.post("/identify", async (req, res) => {
   }
 });
 
-const port = process.env.PORT ? Number(process.env.PORT) : 3000;
-app.listen(port, () => {
-  console.log("Server listening on port", port);
-});
+// 🚀 Export the app instead of listening
+export default app;
