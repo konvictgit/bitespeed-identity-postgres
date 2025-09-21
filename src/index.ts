@@ -15,6 +15,21 @@ function normalizePhone(p: any): string | null {
   return String(p);
 }
 
+app.get("/", (req, res) => {
+  res.send(`
+    <h1>🚀 Bitespeed-Identity API</h1>
+    <p>This is the backend service for the Bitespeed Identity Reconciliation task.</p>
+    <p>Use <code>POST /identify</code> with a JSON body like:</p>
+    <pre>
+    {
+      "email": "lorraine@hillvalley.edu",
+      "phoneNumber": "123456"
+    }
+    </pre>
+    <p>to see identity resolution in action.</p>
+  `);
+});
+
 app.post("/identify", async (req, res) => {
   const incomingEmail = req.body.email ?? null;
   const incomingPhone = normalizePhone(req.body.phoneNumber ?? null);
