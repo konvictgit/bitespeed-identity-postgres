@@ -29,8 +29,11 @@ app.post("/identify", async (req, res) => {
   try {
     await client.query("BEGIN");
 
+    // ✅ use lowercase table/column names
     const initialRows = await client.query(
-      `SELECT * FROM Contact WHERE (email = $1 AND email IS NOT NULL) OR (phoneNumber = $2 AND phoneNumber IS NOT NULL)`,
+      `SELECT * FROM contact 
+       WHERE (email = $1 AND email IS NOT NULL) 
+       OR (phonenumber = $2 AND phonenumber IS NOT NULL)`,
       [incomingEmail, incomingPhone]
     );
 
@@ -44,13 +47,14 @@ app.post("/identify", async (req, res) => {
       ids.push(r.id);
     });
 
+    // Expand connected set
     let changed = true;
     while (changed) {
       changed = false;
       const rows = await client.query(
-        `SELECT * FROM Contact WHERE 
-          (email = ANY($1::text[])) OR 
-          (phoneNumber = ANY($2::text[]))`,
+        `SELECT * FROM contact 
+         WHERE (email = ANY($1::text[])) 
+         OR (phonenumber = ANY($2::text[]))`,
         [[...emails], [...phones]]
       );
       for (const r of rows.rows) {
@@ -64,8 +68,9 @@ app.post("/identify", async (req, res) => {
     }
 
     if (ids.length === 0) {
+      // No contact found → insert new primary
       const insert = await client.query(
-        `INSERT INTO Contact (phoneNumber,email,linkedId,linkPrecedence,createdAt,updatedAt,deletedAt)
+        `INSERT INTO contact (phonenumber,email,linkedid,linkprecedence,createdat,updatedat,deletedat)
          VALUES ($1,$2,NULL,'primary',$3,$3,NULL) RETURNING *`,
         [incomingPhone, incomingEmail, nowIso()]
       );
@@ -80,6 +85,37 @@ app.post("/identify", async (req, res) => {
         },
       });
     }
+
+    // ✅ if contacts exist → compute response instead of hanging
+    const contacts = await client.query(
+      `SELECT * FROM contact WHERE id = ANY($1::int[])`,
+      [ids]
+    );
+
+    // find primary
+    let primary = contacts.rows.find(
+      (c: any) => c.linkprecedence === "primary"
+    );
+    if (!primary) {
+      primary = contacts.rows.reduce((prev: any, curr: any) =>
+        prev.id < curr.id ? prev : curr
+      );
+    }
+
+    const secondaryIds = contacts.rows
+      .filter((c: any) => c.id !== primary.id)
+      .map((c: any) => c.id);
+
+    await client.query("COMMIT");
+
+    return res.json({
+      contact: {
+        primaryContactId: primary.id,
+        emails: [...emails],
+        phoneNumbers: [...phones],
+        secondaryContactIds: secondaryIds,
+      },
+    });
   } catch (err) {
     await client.query("ROLLBACK");
     console.error(err);
@@ -89,5 +125,4 @@ app.post("/identify", async (req, res) => {
   }
 });
 
-// 🚀 Export the app instead of listening
 export default app;
