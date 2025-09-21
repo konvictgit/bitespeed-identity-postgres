@@ -1,61 +1,99 @@
 # Bitespeed Identity Reconciliation Service (Postgres)
 
-## Overview
-Node.js + TypeScript Express service exposing **POST /identify** to consolidate contacts into primary + secondary identities using PostgreSQL.
+# 🚀 Bitespeed Identity API
 
-## Setup
+This project is built for the **Bitespeed Identity Reconciliation task**.  
+It provides an API to reconcile user identities based on email and phone numbers.
 
-### 1. Install dependencies
-```bash
-npm install
-```
+---
 
-### 2. Build
-```bash
-npm run build
-```
+## ✨ Features
 
-### 3. Setup Postgres DB
-Create a database, e.g. `bitespeed`.
+- Exposes a single endpoint: `POST /identify`
+- Accepts **JSON body** (not form-data)
+- Reconciles contacts into **primary** and **secondary identities**
+- Hosted online for testing and submission
+- Uses **PostgreSQL (Neon.tech)** as the database
+- Deployed on **Vercel**
 
-Run migration:
-```sql
-CREATE TABLE IF NOT EXISTS Contact (
-  id SERIAL PRIMARY KEY,
-  phoneNumber TEXT,
-  email TEXT,
-  linkedId INT REFERENCES Contact(id),
-  linkPrecedence VARCHAR(10) CHECK (linkPrecedence IN ('primary','secondary')) NOT NULL,
-  createdAt TIMESTAMPTZ NOT NULL,
-  updatedAt TIMESTAMPTZ NOT NULL,
-  deletedAt TIMESTAMPTZ
-);
+---
 
-CREATE INDEX IF NOT EXISTS idx_contact_email ON Contact(email);
-CREATE INDEX IF NOT EXISTS idx_contact_phone ON Contact(phoneNumber);
-CREATE INDEX IF NOT EXISTS idx_contact_linkedId ON Contact(linkedId);
-```
+## 🔗 Hosted URL
 
-### 4. Configure environment variables
-Create `.env` file:
-```
-PGHOST=localhost
-PGPORT=5432
-PGUSER=youruser
-PGPASSWORD=yourpassword
-PGDATABASE=bitespeed
-```
+- **Root URL (Health Check)** → [https://bitespeed-identity-postgres.vercel.app](https://bitespeed-identity-postgres.vercel.app)  
+  Shows project name and usage instructions.  
 
-### 5. Start the service
-```bash
-npm start
-```
+- **Identify Endpoint** →  
+  `POST https://bitespeed-identity-postgres.vercel.app/identify`
 
-Server will run on port 3000.
+---
 
-### 6. Example
-```bash
-curl -X POST http://localhost:3000/identify \
+## ⚙️ Tech Stack
+
+- **Node.js** + **Express**
+- **PostgreSQL** (Neon)
+- **TypeScript**
+- **Vercel** (serverless deployment)
+
+---
+
+## 📦 Setup (Local Development)
+
+1. Clone the repo:
+   ```bash
+   git clone https://github.com/<your-username>/bitespeed-identity-postgres.git
+   cd bitespeed-identity-postgres
+
+
+## 🛠️ API Usage
+Endpoint
+
+POST /identify
+
+Request Body
+
+Must include at least one of email or phoneNumber.
+
+{
+  "email": "lorraine@hillvalley.edu",
+  "phoneNumber": "123456"
+}
+
+Response Example
+{
+  "contact": {
+    "primaryContactId": 1,
+    "emails": [
+      "lorraine@hillvalley.edu",
+      "mcfly@hillvalley.edu"
+    ],
+    "phoneNumbers": [
+      "123456"
+    ],
+    "secondaryContactIds": [2]
+  }
+}
+
+
+## 🧪 Testing with Postman / Curl
+
+Curl Example
+
+curl -X POST https://bitespeed-identity-postgres.vercel.app/identify \
   -H "Content-Type: application/json" \
   -d '{"email":"lorraine@hillvalley.edu","phoneNumber":"123456"}'
-```
+
+
+Postman Example
+
+Method: POST
+
+URL: https://bitespeed-identity-postgres.vercel.app/identify
+
+Body → raw JSON:
+
+{
+  "email": "lorraine@hillvalley.edu",
+  "phoneNumber": "123456"
+}
+
